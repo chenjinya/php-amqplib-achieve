@@ -27,7 +27,6 @@ php app/worker/cli.php --topic=User --subscribe
 php app/worker/cli.php --topic=User
 ```
 
-`User` is queue name and class name
 
 Pusher (Publish)
 ---
@@ -40,21 +39,18 @@ php app/pusher/cli.php --topic=User --router=a.b.c --message='Hello world!' --su
 php app/pusher/cli.php --topic=User --router=a.b.c --message='Hello world!'
 ```
 
-`User` is queue name and class name
-
-`'Hello'` is send message
-
-
 Usage
 ---
 
+
 `Usage: [--help][--topic=some][--queue=some][--router=some][--message=some][--subscribe]`
 
-`--topic` Class file name. If used in SUBSCRIBE model ,it's exchange's topic.
-`--queue` Queue name. only be used in QUEUE model
-`--router` Router key. only be used in SUBSCRIBE model
-`--message` Message. 
-`--subscribe` use SUBSCRIBE model.
+
+1. `--topic` Class file name. If used in SUBSCRIBE model ,it's exchange's topic.
+2. `--queue` Queue name. only be used in QUEUE model
+3. `--router` Router key. only be used in SUBSCRIBE model
+4. `--message` Message. 
+5. `--subscribe` use SUBSCRIBE model.
 
 TODO
 ---
@@ -67,6 +63,8 @@ Tutorial steps:
 4. [x] four
 5. [x] five
 6. [ ] six
+7. [ ] delay queue
+
 
 
 
