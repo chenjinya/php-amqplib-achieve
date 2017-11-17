@@ -36,7 +36,7 @@ Pusher (Publish)
 php app/pusher/cli.php --topic=User --router=a.b.c --message='Hello world!' --subscribe
 
 #queue
-php app/pusher/cli.php --topic=User --router=a.b.c --message='Hello world!'
+php app/pusher/cli.php --topic=User --queue=User --message='Hello world!'
 ```
 
 Usage
@@ -47,9 +47,9 @@ Usage
 
 
 1. `--topic` Class file name. If used in SUBSCRIBE model ,it's exchange's topic.
-2. `--queue` Queue name. only be used in QUEUE model
-3. `--router` Router key. only be used in SUBSCRIBE model
-4. `--message` Message. 
+2. `--queue` Queue name. only used in QUEUE model
+3. `--router` Router key. only used in SUBSCRIBE model
+4. `--message` Message body. 
 5. `--subscribe` use SUBSCRIBE model.
 
 TODO
