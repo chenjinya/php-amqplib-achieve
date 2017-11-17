@@ -1,6 +1,6 @@
 # Rabbit MQ PHP achieve
 
-0 Introduction
+Introduction
 ---
 This is a simple PHP achieve by php-amqplib.
 
@@ -39,13 +39,14 @@ php app/pusher/cli.php User 'Hello'
 TODO
 ---
 
-[x] one
-[x] two
-[] three
-[] four
-[] five
-[] six
+Tutorial steps:
 
+1. [x] one
+2. [x] two
+3. [ ] three
+4. [ ] four
+5. [ ] five
+6. [ ] six
 
 
 
