@@ -1,0 +1,25 @@
+{
+    "name": "faceparty/rabbitmq-php",
+    "description": "rabbitmq-php implementation",
+    "keywords": ["rabbitmq", "php", "facepart"],
+    "homepage": "http://www.ifaceparty.com/",
+    "type": "project",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.4.0",
+        "php-amqplib/php-amqplib": ">=2.6.1",
+        "symfony/polyfill": "~1.6.0",
+        "monolog/monolog": "^1.23"
+    },
+    "config": {
+        "process-timeout": 1800
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
+    }
+
+}
