@@ -16,17 +16,22 @@ class User extends RMQPWorkerAbstract  {
     const MQ_PORT = 5672;
     const MQ_USER = 'guest';
 
-    public function __construct($queue_name){
-        parent::__construct($queue_name);
+    protected $router_key_list = [
+        'a.b.c',
+        'a.*',
+    ];
+    public function __construct($topic, $queue_name, $option){
+        parent::__construct($topic, $queue_name, $option);
     }
     public function execute( $msg){
-        Console::warning('dd', (array)$msg);
+
         $this->handelHello($msg);
-        parent::execute($msg);
+        return true;
     }
 
     protected function handelHello($msg){
-        Console::warning($msg->body);
+        Console::warning("execute " . $msg->body);
         sleep(10);
+        Console::warning("execute finish");
     }
 }

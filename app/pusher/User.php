@@ -12,12 +12,12 @@ use app\lib\Console;
 
 class User extends RMQPPusherAbstract   {
 
-    public function __construct($queue_name){
-        parent::__construct($queue_name);
+    public function __construct($topic, $queue_name, $option){
+        parent::__construct($topic, $queue_name, $option);
     }
-    public function push($payload){
-        parent::push($payload);
+    public function push($payload, $router_key){
+        Console::warning('', [$payload, $router_key]);
+        parent::push($payload, $router_key);
     }
-
 
 }

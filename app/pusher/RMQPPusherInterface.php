@@ -12,11 +12,7 @@ namespace app\pusher;
 interface RMQPPusherInterface
 {
 
-//    public function execute();
-//    public function beforeExecute();
-//    public function afterExecute();
-
-
-    public function push($payload);
-    public function delayPush($payload, $delay);
+    public function __construct($topic, $queue_name, $option);
+    public function push($payload, $router_key);
+    public function delayPush($payload, $delay, $router_key);
 }
