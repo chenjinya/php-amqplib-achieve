@@ -10,8 +10,10 @@ require_once __DIR__ . '/../autoload.php';
 
 $topic = '';
 $queue_name = '';
-$option = '';
+$exchange = '';
+$delay = 0;
 $arguments = array_slice($argv, 1);
+$help = "Usage: [--help][--topic=string][--exchange=string][--queue=string][--delay=number] \n";
 foreach($arguments as $cmd) {
     $arr = explode('=', $cmd);
     if(empty($arr) || count($arr) < 1) {
@@ -20,23 +22,28 @@ foreach($arguments as $cmd) {
     switch ($arr[0]) {
         case false:
         case '--help':
-            echo "Usage: [--help][--topic=some][--queue=some][--subscribe] \n";
+            echo $help;
             exit(0);
-            break;
         case '--topic':
             $topic = $arr[1];
             break;
         case '--queue':
             $queue_name = $arr[1];
             break;
-        case '--subscribe':
-            $option['subscribe'] = true;
+        case '--exchange':
+            $exchange = $arr[1];
             break;
+        case '--delay':
+            $delay = $arr[1];
+            break;
+        default:
+            echo $help;
+            exit(0);
     }
 }
 
 
 $fullClass = "app\\worker\\{$topic}";
 
-$a = new $fullClass($topic, $queue_name, $option);
+$a = new $fullClass($exchange, $queue_name, $delay);
 $a->listen();

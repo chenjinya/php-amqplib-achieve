@@ -36,5 +36,10 @@ class Console {
         $log->notice($message, $payload);
     }
 
+    public static function debug($message , $payload = [], $category = self::DEFAULT_CATEGORY){
+        $log = new Logger($category);
+        $log->debug($message, $payload);
+    }
+
 
 }

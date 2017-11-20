@@ -12,51 +12,73 @@ use app\worker\exception\ParamErrorException;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use app\lib\Console;
+use PhpAmqpLib\Wire\AMQPTable;
+use app\Config;
 
 
 class RMQPPusherAbstract implements RMQPPusherInterface
 {
 
-    const HOST = 'localhost';
-    const PORT = 5672;
-    const USER = 'guest';
-    const PASS = 'guest';
+    const HOST = Config::HOST;
+    const PORT = Config::PORT;
+    const USER = Config::USER;
+    const PASS = Config::PASS;
+    const DEFAULT_EXCHANGE_TYPE = Config::DEFAULT_EXCHANGE_TYPE;
+
+
     protected  $connection = null;
     protected  $channel = null;
-    protected $topic = '';
+
     protected $queue_name = '';
     protected $router_key = '';
+    protected $delay = 0;
     protected $option = [];
-    protected $is_subscribe = false;
+    protected $exchange = false;
+    protected $delay_exchange_name = '';
+    protected $delay_queue_name = '';
 
     /**
      * RMQPPusherAbstract constructor.
-     * @param $topic
-     * @param $option
+     * @param $exchange
      * @param $queue_name
+     * @param $delay
      * @throws ParamErrorException
      */
-    public function __construct($topic = null, $queue_name = null, $option = []){
+    public function __construct($exchange = '', $queue_name = '', $delay = 0){
 
-        $this->topic = $topic;
-        if(empty($this->topic)) {
-            throw new ParamErrorException('Param `topic` is require');
-        }
+        $this->exchange = $exchange;
         $this->queue_name = $queue_name;
-        $this->option = $option;
 
-        if(isset($this->option['subscribe']) && $this->option['subscribe']) {
-            $this->is_subscribe = true;
-            Console::info("pusher model is [SUBSCRIBE]", [], __METHOD__);
+        if(empty($this->exchange) && empty($this->queue_name)) {
+            throw new ParamErrorException('Param `exchange` or `queue_name` is require');
+        }
+
+
+        if($this->exchange) {
+            Console::debug("Pusher model is [EXCHANGE]", [
+                'exchange'      => $exchange,
+                'queue_name'    => $queue_name,
+                'delay'         => $delay
+            ], __METHOD__);
         } else {
             if(empty($this->queue_name)) {
                 throw new ParamErrorException('model [QUEUE] param `queue_name` is require');
             }
-            Console::info("Pusher model is [QUEUE]", [], __METHOD__);
+            Console::debug("Pusher model is [QUEUE]", [
+                'exchange'      => $exchange,
+                'queue_name'    => $queue_name,
+                'delay'         => $delay
+            ], __METHOD__);
         }
+
         $this->connection = new AMQPStreamConnection(self::HOST, self::PORT, self::USER, self::PASS);
         $this->channel = $this->connection->channel();
-        $this->prepare();
+        if(0 == $delay) {
+            $this->prepare();
+        } else {
+            $this->prepareTypeDelay($delay);
+        }
+
 
     }
 
@@ -64,8 +86,8 @@ class RMQPPusherAbstract implements RMQPPusherInterface
      * set some declare not only include exchange or queue
      */
     public function prepare(){
-        if($this->is_subscribe) {
-            $this->channel->exchange_declare($this->topic, 'topic', false, false, false);
+        if($this->exchange) {
+            $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE, false, false, false);
         } else {
             $this->channel->queue_declare(
                 $this->queue_name,
@@ -79,19 +101,39 @@ class RMQPPusherAbstract implements RMQPPusherInterface
     }
 
     /**
+     * delay prepare
+     * @param $delay
+     */
+    public function prepareTypeDelay($delay){
+
+        $this->delay                = $delay;
+        $delay_exchange_name        = "{$this->exchange}_delay_{$this->delay}";
+        $this->delay_exchange_name  = $delay_exchange_name;
+
+
+        $this->channel->exchange_declare($delay_exchange_name , Config::DELAY_EXCHANGE_TYPE,false,false,false);
+        $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE,false,false,false);
+
+
+        //actually task queue
+        $this->channel->queue_declare($this->queue_name, false,true,false,false,false);
+        $this->channel->queue_bind($this->queue_name, $this->exchange,  $this->exchange);
+    }
+
+    /**
      * push task
      * @param $router_key
      * @param $payload
      */
-    public function push($payload, $router_key){
+    public function push($payload, $router_key = ''){
 
         $msg = new AMQPMessage(
             $payload,
             [
                 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,// persistent message
             ]);
-        if($this->is_subscribe) {
-             $this->channel->basic_publish($msg, $this->topic, $router_key);
+        if($this->exchange) {
+             $this->channel->basic_publish($msg, $this->exchange, $router_key);
         } else {
              $this->channel->basic_publish($msg, '', $this->queue_name);
         }
@@ -106,7 +148,34 @@ class RMQPPusherAbstract implements RMQPPusherInterface
      */
     public function delayPush($payload, $delay, $router_key)
     {
-        // TODO: Implement delayPush() method.
+        $delay = intval($delay);
+        $delay_queue_name           = "{$this->queue_name}_delay_{$this->delay}";
+        $this->delay_queue_name     = $delay_queue_name;
+
+        $tale = new AMQPTable();
+        $tale->set('x-dead-letter-exchange', $this->exchange);
+        $tale->set('x-dead-letter-routing-key', $router_key);
+        $tale->set('x-message-ttl', $delay * 1000);
+
+        //for delay waiting
+        $this->channel->queue_declare($delay_queue_name,false,$durable = true,false,false,false,$tale);
+        $this->channel->queue_bind($delay_queue_name, $this->delay_exchange_name, $router_key);
+
+
+        $msg = new AMQPMessage(
+            $payload,
+            $properties =[
+//                'expiration' => intval($delay * 1000),
+                'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,// persistent message
+            ]);
+
+        $this->channel->basic_publish(
+            $msg,
+            $this->delay_exchange_name,
+            $router_key
+        );
+        Console::debug("[Pusher][Delay][$delay] $payload", $properties);
+
     }
 
     /**

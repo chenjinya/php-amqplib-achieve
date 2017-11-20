@@ -11,58 +11,76 @@ use app\worker\exception\EmptyRouterException;
 use app\worker\exception\ParamErrorException;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use app\lib\Console;
-
+use app\Config;
 
 class RMQPWorkerAbstract implements RMQPWorkerInterface
 {
 
-    const HOST = 'localhost';
-    const PORT = 5672;
-    const USER = 'guest';
-    const PASS = 'guest';
+    const HOST = Config::HOST;
+    const PORT = Config::PORT;
+    const USER = Config::USER;
+    const PASS = Config::PASS;
+    const DEFAULT_EXCHANGE_TYPE = Config::DEFAULT_EXCHANGE_TYPE;
+
     protected $connection = null;
     protected $channel = null;
-    protected $option = [];
-    protected $topic = '';
+
+    protected $exchange = '';
     protected $queue_name = '';
     protected $router_key = '';
     protected $router_key_list = [];
-    protected $is_subscribe = false;
+    protected $delay = 0;
+    protected $delay_exchange_name = '';
 
     /**
      * RMQPWorkerAbstract constructor.
-     * @param $topic
-     * @param $option
+     * @param $exchange
      * @param $queue_name
+     * @param $delay
      * @throws ParamErrorException
      */
-    public function __construct($topic = null, $queue_name = null, $option = []){
-        $this->topic = $topic;
-        if(empty($this->topic)) {
-            throw new ParamErrorException('Param `topic` is require');
-        }
+    public function __construct($exchange = '', $queue_name = '', $delay = 0){
+        $this->exchange = $exchange;
         $this->queue_name = $queue_name;
-        $this->option = $option;
+        if(empty($this->exchange) && empty($this->queue_name)) {
+            throw new ParamErrorException('Param `exchange` or `queue_name` is require');
+        }
 
-        if(isset($this->option['subscribe']) && $this->option['subscribe']) {
-            $this->is_subscribe = true;
-            Console::info("worker model is [SUBSCRIBE]", [], __METHOD__);
+
+        if($this->exchange) {
+            Console::debug("Worker model is [EXCHANGE]", [
+                'exchange'      => $exchange,
+                'queue_name'    => $queue_name,
+                'delay'         => $delay
+            ], __METHOD__);
         } else {
             if(empty($this->queue_name)) {
                 throw new ParamErrorException('model [QUEUE] param `queue_name` is require');
             }
-            Console::info("worker model is [QUEUE]", [], __METHOD__);
+            Console::debug("Worker model is [QUEUE]", [
+                'exchange'      => $exchange,
+                'queue_name'    => $queue_name,
+                'delay'         => $delay
+            ], __METHOD__);
         }
+
 
         $this->connection = new AMQPStreamConnection(self::HOST, self::PORT, self::USER, self::PASS);
         $this->channel = $this->connection->channel();
 
-        $this->prepare();
-        Console::info("init success!", [
-            "topic" => $topic,
+        if(0 == $delay) {
+            $this->prepare();
+
+        } else {
+            $this->prepareTypeDelay($delay);
+        }
+        Console::debug("Worker start success!", [
+            "exchange" => $exchange,
+            "queue_name" => $queue_name,
             "host" => self::HOST,
             "port" => self::PORT,
         ], __METHOD__);
+
     }
 
 
@@ -72,26 +90,27 @@ class RMQPWorkerAbstract implements RMQPWorkerInterface
      */
     public function prepare(){
 
-        if($this->is_subscribe == true) {
-            $this->channel->exchange_declare($this->topic, 'topic', false, false, false);
+        if($this->exchange == true) {
+            $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE, false, false, false);
             list($queue_name, ,) = $this->channel->queue_declare(
-                '',
+                $this->queue_name,
                 false,
                 $durable= true, /* persistent queue */
                 false,
                 false
             );
-            $this->queue_name = $queue_name;
+            if(empty($this->queue_name)) {
+                $this->queue_name = $queue_name;
+            }
 
             if(empty($this->router_key_list)) {
                 throw new EmptyRouterException("Router key list should not be EMPTY!");
             }
             foreach($this->router_key_list as $router_key) {
-                Console::info("Queue bind: {$this->queue_name} => $router_key");
-                $this->channel->queue_bind($this->queue_name, $this->topic, $router_key);
+                Console::debug("Queue bind: {$this->queue_name} => $router_key");
+                $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
             }
         } else {
-            Console::info("Queue name: {$this->topic}");
             $this->channel->queue_declare(
                 $this->queue_name,
                 false,
@@ -101,6 +120,22 @@ class RMQPWorkerAbstract implements RMQPWorkerInterface
             );
         }
 
+    }
+
+    public function prepareTypeDelay($delay){
+
+        $this->delay                = $delay;
+        $delay_exchange_name        = "{$this->exchange}_delay_{$this->delay}";
+        $this->delay_exchange_name  = $delay_exchange_name;
+
+        $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE,false,false,false);
+        $this->channel->exchange_declare($delay_exchange_name , Config::DELAY_EXCHANGE_TYPE ,false,false,false);
+
+        $this->channel->queue_declare($this->queue_name,false,true,false,false,false);
+        foreach($this->router_key_list as $router_key) {
+            Console::debug("Queue bind: {$this->queue_name} => $router_key");
+            $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
+        }
     }
 
     /**
@@ -143,6 +178,7 @@ class RMQPWorkerAbstract implements RMQPWorkerInterface
      */
     public function execute($msg){
 
+        Console::debug("Get message ", (array)$msg);
         return true;
     }
 
