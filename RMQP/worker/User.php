@@ -5,9 +5,9 @@
  * Date: 2017/11/16
  * Time: 下午7:56
  */
-namespace app\worker;
-use app\lib\Console;
-use app\worker\RMQPWorkerAbstract;
+namespace RMQP\worker;
+use RMQP\lib\Console;
+use RMQP\worker\RMQPWorkerAbstract;
 
 
 class User extends RMQPWorkerAbstract  {

@@ -15,7 +15,7 @@ spl_autoload_register(function($class) {
     array_shift($list);
     $relative_file_path = implode("/", $list);
 
-    if ($alias === 'app') {
+    if ($alias === 'RMQP') {
         $class_file = __DIR__.  "/{$relative_file_path}.php";
         if (file_exists($class_file)) {
             require_once($class_file);

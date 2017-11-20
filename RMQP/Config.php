@@ -5,7 +5,7 @@
  * Date: 2017/11/16
  * Time: 下午7:57
  */
-namespace app;
+namespace RMQP;
 
 class Config
 {

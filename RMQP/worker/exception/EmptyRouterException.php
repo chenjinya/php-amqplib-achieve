@@ -6,7 +6,7 @@
  * Time: 下午5:55
  */
 
-namespace app\worker\exception;
+namespace RMQP\worker\exception;
 
 
 class EmptyRouterException extends \Exception

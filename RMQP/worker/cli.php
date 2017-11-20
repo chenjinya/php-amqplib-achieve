@@ -5,7 +5,7 @@
  * Date: 2017/11/16
  * Time: 下午7:57
  */
-namespace app\worker;
+namespace RMQP\worker;
 require_once __DIR__ . '/../autoload.php';
 
 $topic = '';
@@ -43,7 +43,7 @@ foreach($arguments as $cmd) {
 }
 
 
-$fullClass = "app\\worker\\{$topic}";
+$fullClass = "RMQP\\worker\\{$topic}";
 
 $a = new $fullClass($exchange, $queue_name, $delay);
 $a->listen();

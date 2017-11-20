@@ -6,7 +6,7 @@
  * Time: 下午8:08
  */
 
-namespace app\worker;
+namespace RMQP\worker;
 
 
 interface RMQPWorkerInterface

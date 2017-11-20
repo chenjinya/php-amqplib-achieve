@@ -6,16 +6,13 @@
  * Time: 下午7:57
  */
 namespace app\pusher;
-use app\lib\Console;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
-
 require_once __DIR__ . '/../autoload.php';
 
 $topic = '';
 $queue_name = '';
 $message = '';
-$option = [];
 $router_key = '';
 $delay = 0;
 $exchange = '';
@@ -59,7 +56,7 @@ foreach($arguments as $cmd) {
 }
 
 
-$fullClass = "app\\pusher\\{$topic}";
+$fullClass = "RMQP\\pusher\\{$topic}";
 
 $a = new $fullClass($exchange, $queue_name, $delay);
 if($delay) {
