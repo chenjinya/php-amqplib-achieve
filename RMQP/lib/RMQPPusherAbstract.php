@@ -162,7 +162,7 @@ class RMQPPusherAbstract implements RMQPPusherInterface
         $msg = new AMQPMessage(
             $payload,
             $properties =[
-//                'expiration' => intval($delay * 1000),
+//                'expiration' => intval($delay * 1000),// this param control message ttl alone, different expire  will cause queue blocked by long expire task
                 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,// persistent message
             ]);
 

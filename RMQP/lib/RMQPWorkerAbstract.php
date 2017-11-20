@@ -101,11 +101,12 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
                 $this->queue_name = $queue_name;
             }
 
+
+            $this->router_key_list = $this->getRouterKeys();
             if(empty($this->router_key_list)) {
                 throw new EmptyRouterException("Router key list should not be EMPTY!");
             }
 
-            $this->router_key_list = $this->getRouterKeys();
             foreach($this->router_key_list as $router_key) {
                 Console::debug("Queue bind: {$this->queue_name} => $router_key");
                 $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
@@ -134,6 +135,10 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
         $this->channel->queue_declare($this->queue_name,false,true,false,false,false);
 
         $this->router_key_list = $this->getRouterKeys();
+        if(empty($this->router_key_list)) {
+            throw new EmptyRouterException("Router key list should not be EMPTY!");
+        }
+
         foreach($this->router_key_list as $router_key) {
             Console::debug("Queue bind: {$this->queue_name} => $router_key");
             $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
