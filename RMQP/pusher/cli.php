@@ -10,53 +10,43 @@ namespace app\pusher;
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../autoload.php';
 
-$topic = '';
-$queue_name = '';
-$message = '';
-$router_key = '';
-$delay = 0;
-$exchange = '';
-$arguments = array_slice($argv, 1);
-$help = "Usage: [--help][--topic=string][--exchange=string][--queue=string][--router=string][--message=string][--delay=number] \n";
 
+$arguments = array_slice($argv, 1);
+$help = "Usage: [--help][--topic=string][--exchange=string][--queue=string][--router=string][--message=string][--delay=number] \nFor detail please read README\n";
+
+$param = [];
+$paramAllow = [
+    '--help',
+    '--topic',
+    '--exchange',
+    '--queue',
+    '--router',
+    '--message',
+    '--delay',
+];
 foreach($arguments as $cmd) {
     $arr = explode('=', $cmd);
-    if(empty($arr) || count($arr) < 1) {
-        $arr[0] = false;
+    if(empty($arr) || count($arr) <= 1) {
+        echo $help;exit(0);
     }
 
-    switch ($arr[0]) {
-        case false:
-        case '--help':
-            echo $help;
-            exit(0);
-            break;
-        case '--topic':
-            $topic = $arr[1];
-            break;
-        case '--exchange':
-            $exchange = $arr[1];
-            break;
-        case '--queue':
-            $queue_name = $arr[1];
-            break;
-        case '--router':
-            $router_key = $arr[1];
-            break;
-        case '--message':
-            $message = $arr[1];
-            break;
-        case '--delay':
-            $delay = $arr[1];
-            break;
-        default :
-            echo $help;
-            exit(0);
+    if(in_array($arr[0], $paramAllow)) {
+        $param[$arr[0]] = $arr[1];
+    } else {
+        echo "Param {$arr[0]} is illegal";
+        echo $help;exit(0);
+
     }
+
 }
+$class_name = $param['--topic'];
+$queue_name = $param['--queue'];
+$exchange = $param['--exchange'];
+$router_key = $param['--router'];
+$message = $param['--message'];
+$delay = $param['--delay'];
 
-
-$fullClass = "RMQP\\pusher\\{$topic}";
+$fullClass = "RMQP\\pusher\\{$class_name}";
 
 $a = new $fullClass($exchange, $queue_name, $delay);
 if($delay) {

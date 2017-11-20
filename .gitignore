@@ -2,4 +2,3 @@ vendor
 .idea
 composer.lock
 test.php
-app/worker/ctl.php
