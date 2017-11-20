@@ -93,7 +93,7 @@ ATTENTION
 ---
 Delay queue achieved by `TTL` and `DLX`, different `delay` number(seconds) in only one queue will cause queue blocked. We must make a deal that procedure should create separate queues and exchanges for each number(seconds) of seconds. 
 
-`DLX` do not support `topic` so that procedure create separate  exchanges for each router keys. 
+Exchange do not support different `x-dead-letter-router-key` so that procedure will create separate  exchanges for each router keys. 
 
 The above needs to be considered in the operation and maintenance (OP) layer.
 
