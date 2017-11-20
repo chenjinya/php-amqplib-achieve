@@ -7,7 +7,9 @@
  */
 namespace RMQP\pusher;
 
-class User extends RMQPPusherAbstract   {
+use RMQP\lib\RMQPPusherAbstract;
+
+class User extends RMQPPusherAbstract    {
 
 
 

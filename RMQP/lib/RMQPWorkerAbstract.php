@@ -6,12 +6,8 @@
  * Time: 下午8:08
  */
 
-namespace RMQP\worker;
-use RMQP\worker\exception\EmptyRouterException;
-use RMQP\worker\exception\ParamErrorException;
+namespace RMQP\lib;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
-use RMQP\lib\Console;
-use RMQP\Config;
 
 abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
 {

@@ -6,14 +6,11 @@
  * Time: 下午8:08
  */
 
-namespace RMQP\pusher;
+namespace RMQP\lib;
 
-use RMQP\worker\exception\ParamErrorException;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use RMQP\lib\Console;
 use PhpAmqpLib\Wire\AMQPTable;
-use RMQP\Config;
 
 
 class RMQPPusherAbstract implements RMQPPusherInterface

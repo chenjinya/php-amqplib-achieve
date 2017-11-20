@@ -7,7 +7,9 @@
  */
 namespace RMQP\worker;
 
-class User extends RMQPWorkerAbstract  {
+use RMQP\lib\RMQPWorkerAbstract;
+
+class User extends RMQPWorkerAbstract   {
 
     protected function getRouterKeys()
     {

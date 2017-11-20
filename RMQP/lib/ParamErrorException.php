@@ -6,7 +6,7 @@
  * Time: 下午5:55
  */
 
-namespace RMQP\worker\exception;
+namespace RMQP\lib;
 
 
 class ParamErrorException extends \Exception

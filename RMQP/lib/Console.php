@@ -8,8 +8,6 @@
 namespace RMQP\lib;
 
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use RMQP\Config;
 
 class Console {
 
