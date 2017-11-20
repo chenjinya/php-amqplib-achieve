@@ -10,6 +10,8 @@ Before you do below, RabbitMQ server should be started successfully.
 
 Document is http://www.rabbitmq.com/tutorials/tutorial-one-php.html
 
+about name `RMQP` means " Rabbit Message Queue Php "
+
 Install
 ----
 
