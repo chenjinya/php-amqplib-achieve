@@ -18,4 +18,6 @@ class Config
 
     //delay use   `x-dead-letter-router-key`, it's a one-to-one router, so we use `direct` type
     const DELAY_EXCHANGE_TYPE = 'direct';
+
+    const ENV = 'dev';
 }

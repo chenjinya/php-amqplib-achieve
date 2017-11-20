@@ -6,16 +6,14 @@
  * Time: 下午7:56
  */
 namespace RMQP\worker;
-use RMQP\lib\Console;
-use RMQP\worker\RMQPWorkerAbstract;
-
 
 class User extends RMQPWorkerAbstract  {
 
-
-    protected $router_key_list = [
-        'a.b.c',
-        'a.*',
-    ];
-
+    protected function getRouterKeys()
+    {
+        return [
+            'a.b.c',
+            'a.*',
+        ];
+    }
 }

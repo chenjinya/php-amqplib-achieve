@@ -13,7 +13,7 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use RMQP\lib\Console;
 use RMQP\Config;
 
-class RMQPWorkerAbstract implements RMQPWorkerInterface
+abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
 {
 
     const HOST = Config::HOST;
@@ -31,6 +31,8 @@ class RMQPWorkerAbstract implements RMQPWorkerInterface
     protected $router_key_list = [];
     protected $delay = 0;
     protected $delay_exchange_name = '';
+
+    abstract protected function getRouterKeys();
 
     /**
      * RMQPWorkerAbstract constructor.
@@ -106,6 +108,8 @@ class RMQPWorkerAbstract implements RMQPWorkerInterface
             if(empty($this->router_key_list)) {
                 throw new EmptyRouterException("Router key list should not be EMPTY!");
             }
+
+            $this->router_key_list = $this->getRouterKeys();
             foreach($this->router_key_list as $router_key) {
                 Console::debug("Queue bind: {$this->queue_name} => $router_key");
                 $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
@@ -132,6 +136,8 @@ class RMQPWorkerAbstract implements RMQPWorkerInterface
         $this->channel->exchange_declare($delay_exchange_name , Config::DELAY_EXCHANGE_TYPE ,false,false,false);
 
         $this->channel->queue_declare($this->queue_name,false,true,false,false,false);
+
+        $this->router_key_list = $this->getRouterKeys();
         foreach($this->router_key_list as $router_key) {
             Console::debug("Queue bind: {$this->queue_name} => $router_key");
             $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);

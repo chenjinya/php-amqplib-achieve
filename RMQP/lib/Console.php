@@ -9,6 +9,7 @@ namespace RMQP\lib;
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use RMQP\Config;
 
 class Console {
 
@@ -37,8 +38,11 @@ class Console {
     }
 
     public static function debug($message , $payload = [], $category = self::DEFAULT_CATEGORY){
-        $log = new Logger($category);
-        $log->debug($message, $payload);
+        if(Config::ENV == 'dev') {
+            $log = new Logger($category);
+            $log->debug($message, $payload);
+        }
+
     }
 
 

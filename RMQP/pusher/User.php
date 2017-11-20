@@ -7,9 +7,6 @@
  */
 namespace RMQP\pusher;
 
-use RMQP\lib\Console;
-
-
 class User extends RMQPPusherAbstract   {
 
 
