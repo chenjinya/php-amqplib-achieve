@@ -13,7 +13,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 
 
-class RMQPPusherAbstract implements RMQPPusherInterface
+abstract class RMQPPusherAbstract implements RMQPPusherInterface
 {
 
     const HOST = Config::HOST;
@@ -146,7 +146,7 @@ class RMQPPusherAbstract implements RMQPPusherInterface
     public function delayPush($payload, $delay, $router_key)
     {
         $delay = intval($delay);
-        $delay_queue_name           = "{$this->queue_name}_delay_{$this->delay}";
+        $delay_queue_name           = "{$this->queue_name}_{$router_key}_delay_{$this->delay}";
         $this->delay_queue_name     = $delay_queue_name;
 
         $tale = new AMQPTable();
