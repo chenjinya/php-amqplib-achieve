@@ -24,19 +24,19 @@ Worker (Consume)
 
 ### Use `Exchange`
 ```
-php RMQP/worker/cli.php --topic=User --exchange=user --queue=user
+php RMQP/worker/cli.php --topic=Test --exchange=test --queue=test
 ```
 
 ### Use `Queue`
 
 ```
-php RMQP/worker/cli.php --topic=User --queue=user
+php RMQP/worker/cli.php --topic=Test --queue=test
 ```
 
 ### Use `Exchange` to achieve `Delay Queue`
 
 ```
-php RMQP/worker/cli.php --topic=User --exchange=user --queue=user --delay=5
+php RMQP/worker/cli.php --topic=Test --exchange=test --queue=test --delay=5
 
 ```
 Pusher (Publish)
@@ -44,19 +44,19 @@ Pusher (Publish)
 
 ### Use `Exchange`
 ```
-php RMQP/pusher/cli.php --topic=User --queue=user --message='123' --router='a.b.c' --exchange=user
+php RMQP/pusher/cli.php --topic=Test --queue=test --message='Hello' --router='a.b.c' --exchange=test
 ```
 
 ### Use `Queue`
 
 ```
-php RMQP/pusher/cli.php --topic=User --queue=user --message='123'
+php RMQP/pusher/cli.php --topic=Test --queue=test --message='Hello'
 ```
 
 ### Use `Exchange` to achieve `Delay Queue`
 
 ```
-php RMQP/pusher/cli.php --topic=User --queue=user --message='123' --router='a.b.c' --exchange=user  --delay=5
+php RMQP/pusher/cli.php --topic=Test --queue=test --message='Hello' --router='a.b.c' --exchange=test  --delay=5
 ```
 
 Usage
