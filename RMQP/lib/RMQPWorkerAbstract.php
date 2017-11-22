@@ -108,7 +108,7 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
             }
 
             foreach($this->router_key_list as $router_key) {
-                Console::debug("Queue bind: {$this->queue_name} => $router_key", __METHOD__);
+                Console::debug("Queue bind: {$this->queue_name} => $router_key",[], __METHOD__);
                 $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
             }
         } else {
