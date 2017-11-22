@@ -37,14 +37,23 @@ foreach($arguments as $cmd) {
         echo $help;exit(0);
 
     }
-
 }
-$class_name = $param['--topic'];
-$queue_name = $param['--queue'];
-$exchange = $param['--exchange'];
-$router_key = $param['--router'];
-$message = $param['--message'];
-$delay = $param['--delay'];
+
+function get($k, $v = null){
+    global $param;
+    if(isset($param[$k])) {
+        return $param[$k];
+    } else {
+        return $v;
+    }
+}
+
+$class_name = get('--topic', '');
+$queue_name =  get('--queue', '');
+$exchange =  get('--exchange', '');
+$router_key =  get('--router', '');
+$message =  get('--message', '');
+$delay =  get('--delay', 0);
 
 $fullClass = "RMQP\\pusher\\{$class_name}";
 
@@ -53,6 +62,5 @@ if($delay) {
     $a->delayPush($message,$delay, $router_key);
 } else {
     $a->push($message, $router_key);
-
 }
 

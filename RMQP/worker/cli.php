@@ -33,10 +33,21 @@ foreach($arguments as $cmd) {
 
 }
 
-$class_name = $param['--topic'];
-$queue_name = $param['--queue'];
-$exchange = $param['--exchange'];
-$delay = $param['--delay'];
+
+function get($k, $v = null){
+    global $param;
+    if(isset($param[$k])) {
+        return $param[$k];
+    } else {
+        return $v;
+    }
+}
+
+$class_name = get('--topic', '');
+$queue_name =  get('--queue', '');
+$exchange =  get('--exchange', '');
+$delay =  get('--delay', 0);
+
 
 $fullClass = "RMQP\\worker\\{$class_name}";
 
