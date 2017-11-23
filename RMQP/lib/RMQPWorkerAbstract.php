@@ -93,7 +93,7 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
                 false,
                 $durable= true, /* persistent queue */
                 false,
-                false
+                $auto_delete = false
             );
             if(empty($this->queue_name)) {
                 $this->queue_name = $queue_name;
@@ -114,7 +114,7 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
                 false,
                 $durable= true, /* persistent queue */
                 false,
-                false
+                $auto_delete = false
             );
         }
 
@@ -123,8 +123,20 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
     public function prepareTypeDelay(){
 
 
-        $this->channel->exchange_declare($this->exchange, Config::DEFAULT_EXCHANGE_TYPE,false,false,false);
-        $this->channel->queue_declare($this->queue_name,false,true,false,false,false);
+        $this->channel->exchange_declare(
+            $this->exchange,
+            Config::DEFAULT_EXCHANGE_TYPE,
+            false,
+            $durable = true,
+            $auto_delete = false
+        );
+        $this->channel->queue_declare(
+            $this->queue_name,
+            false,
+            $durable = true,
+            false,
+            $auto_delete = false
+        );
 
         $router_key_list = $this->getRouterKeys();
         if(empty($router_key_list)) {

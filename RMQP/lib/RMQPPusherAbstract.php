@@ -79,14 +79,20 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
      */
     public function prepare(){
         if($this->exchange) {
-            $this->channel->exchange_declare($this->exchange, Config::DEFAULT_EXCHANGE_TYPE, false, false, false);
+            $this->channel->exchange_declare(
+                $this->exchange,
+                Config::DEFAULT_EXCHANGE_TYPE,
+                false,
+                $durable= true,
+                $auto_delete = false
+            );
         } else {
             $this->channel->queue_declare(
                 $this->queue_name,
                 false,
                 $durable= true, /* persistent queue */
                 false,
-                false
+                $auto_delete = false
             );
         }
     }
@@ -96,7 +102,13 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
      */
     public function prepareTypeDelay(){
         //declare
-        $this->channel->exchange_declare($this->exchange, Config::DEFAULT_EXCHANGE_TYPE,false,false,false);
+        $this->channel->exchange_declare(
+            $this->exchange,
+            Config::DEFAULT_EXCHANGE_TYPE,
+            false,
+            $durable= true,
+            $auto_delete = false
+        );
 
     }
 
@@ -151,7 +163,15 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
         $tale->set('x-message-ttl', $this->delay * 1000);
 
         //for delay waiting
-        $this->channel->queue_declare($delay_queue_name,false,$durable = true,false,false,false,$tale);
+        $this->channel->queue_declare(
+            $delay_queue_name,
+            false,
+            $durable = true,
+            false,
+            $auto_delete = false,
+            false,
+            $tale
+        );
         $this->channel->queue_bind($delay_queue_name, $this->exchange, $delay_router_key);
 
 
