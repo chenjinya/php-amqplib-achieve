@@ -16,17 +16,13 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
     const PORT = Config::PORT;
     const USER = Config::USER;
     const PASS = Config::PASS;
-    const DEFAULT_EXCHANGE_TYPE = Config::DEFAULT_EXCHANGE_TYPE;
 
     protected $connection = null;
     protected $channel = null;
 
     protected $exchange = '';
     protected $queue_name = '';
-    protected $router_key = '';
-    protected $router_key_list = [];
     protected $delay = 0;
-    protected $delay_exchange_name = '';
 
     abstract protected function getRouterKeys();
 
@@ -91,7 +87,7 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
     public function prepare(){
 
         if($this->exchange == true) {
-            $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE, false, false, false);
+            $this->channel->exchange_declare($this->exchange, Config::DEFAULT_EXCHANGE_TYPE, false, false, false);
             list($queue_name, ,) = $this->channel->queue_declare(
                 $this->queue_name,
                 false,
@@ -103,15 +99,15 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
                 $this->queue_name = $queue_name;
             }
 
-            $this->router_key_list = $this->getRouterKeys();
-            if(empty($this->router_key_list)) {
+            $router_key_list = $this->getRouterKeys();
+            if(empty($router_key_list)) {
                 throw new EmptyRouterException("Router key list should not be EMPTY!");
             }
 
-            foreach($this->router_key_list as $router_key) {
+            foreach($router_key_list as $router_key) {
                 $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
             }
-            Console::debug("Queue bind: {$this->queue_name} => ",$this->router_key_list, __METHOD__);
+            Console::debug("Queue router bind: {$this->queue_name} => ",$router_key_list, __METHOD__);
         } else {
             $this->channel->queue_declare(
                 $this->queue_name,
@@ -126,23 +122,19 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
 
     public function prepareTypeDelay(){
 
-        $delay_exchange_name        = "{$this->exchange}_delay_{$this->delay}";
-        $this->delay_exchange_name  = $delay_exchange_name;
 
-        $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE,false,false,false);
-        $this->channel->exchange_declare($delay_exchange_name , Config::DELAY_EXCHANGE_TYPE ,false,false,false);
-
+        $this->channel->exchange_declare($this->exchange, Config::DEFAULT_EXCHANGE_TYPE,false,false,false);
         $this->channel->queue_declare($this->queue_name,false,true,false,false,false);
 
-        $this->router_key_list = $this->getRouterKeys();
-        if(empty($this->router_key_list)) {
+        $router_key_list = $this->getRouterKeys();
+        if(empty($router_key_list)) {
             throw new EmptyRouterException("Router key list should not be EMPTY!");
         }
 
-        foreach($this->router_key_list as $router_key) {
-            Console::debug("Queue bind: {$this->queue_name} => $router_key", [],  __METHOD__);
+        foreach($router_key_list as $router_key) {
             $this->channel->queue_bind($this->queue_name, $this->exchange, $router_key);
         }
+        Console::debug("Queue router bind: {$this->queue_name} => ",$router_key_list, __METHOD__);
     }
 
     /**
