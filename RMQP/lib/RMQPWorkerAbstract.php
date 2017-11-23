@@ -101,7 +101,6 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
                 $this->queue_name = $queue_name;
             }
 
-
             $this->router_key_list = $this->getRouterKeys();
             if(empty($this->router_key_list)) {
                 throw new EmptyRouterException("Router key list should not be EMPTY!");

@@ -107,14 +107,9 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
         $delay_exchange_name        = "{$this->exchange}_delay_{$this->delay}";
         $this->delay_exchange_name  = $delay_exchange_name;
 
-
         $this->channel->exchange_declare($delay_exchange_name , Config::DELAY_EXCHANGE_TYPE,false,false,false);
         $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE,false,false,false);
 
-
-        //actually task queue
-        $this->channel->queue_declare($this->queue_name, false,true,false,false,false);
-        $this->channel->queue_bind($this->queue_name, $this->exchange,  $this->exchange);
     }
 
     /**
@@ -139,6 +134,7 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
 
     /**
      * push delay task
+     * only use exchange. if you just want to use queue, refer to the function `push` for editing this code
      * @param $router_key
      * @param $payload
      * @param $delay
@@ -146,7 +142,7 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
     public function delayPush($payload, $delay, $router_key)
     {
         $delay = intval($delay);
-        $delay_queue_name           = "{$this->queue_name}_{$router_key}_delay_{$this->delay}";
+        $delay_queue_name           = "{$this->exchange}_{$router_key}_delay_{$this->delay}";
         $this->delay_queue_name     = $delay_queue_name;
 
         $tale = new AMQPTable();

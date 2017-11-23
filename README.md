@@ -89,6 +89,8 @@ Delay queue:
 
 0. [x] delay queue
 
+* the delay queue achieved only support exchange. If you just want to use only queue, update code by yourself ^_^.
+
 ATTENTION
 ---
 Delay queue achieved by `TTL` and `DLX`, different `delay` number(seconds) in only one queue will cause queue blocked. We must make a deal that procedure should create separate queues and exchanges for each number(seconds) of seconds. 
