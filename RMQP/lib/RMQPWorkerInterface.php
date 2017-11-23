@@ -15,6 +15,7 @@ interface RMQPWorkerInterface
     public function __construct($topic, $queue_name, $option);
     public function listen();
     public function prepare();
+    public function prepareTypeDelay();
     public function execute($msg);
 
 

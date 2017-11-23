@@ -38,8 +38,10 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
      * @throws ParamErrorException
      */
     public function __construct($exchange = '', $queue_name = '', $delay = 0){
-        $this->exchange = $exchange;
+        $this->exchange   = $exchange;
         $this->queue_name = $queue_name;
+        $this->delay      = $delay;
+
         if(empty($this->exchange) && empty($this->queue_name)) {
             throw new ParamErrorException('Param `exchange` or `queue_name` is require');
         }
@@ -66,11 +68,11 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
         $this->connection = new AMQPStreamConnection(self::HOST, self::PORT, self::USER, self::PASS);
         $this->channel = $this->connection->channel();
 
-        if(0 == $delay) {
+        if(0 == $this->delay) {
             $this->prepare();
 
         } else {
-            $this->prepareTypeDelay($delay);
+            $this->prepareTypeDelay();
         }
         Console::debug("Worker start success!", [
             "exchange" => $exchange,
@@ -122,9 +124,8 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
 
     }
 
-    public function prepareTypeDelay($delay){
+    public function prepareTypeDelay(){
 
-        $this->delay                = $delay;
         $delay_exchange_name        = "{$this->exchange}_delay_{$this->delay}";
         $this->delay_exchange_name  = $delay_exchange_name;
 
