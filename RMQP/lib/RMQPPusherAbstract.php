@@ -43,9 +43,9 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
      */
     public function __construct($exchange = '', $queue_name = '', $delay = 0){
 
-        $this->exchange = $exchange;
+        $this->exchange   = $exchange;
         $this->queue_name = $queue_name;
-
+        $this->delay      = $delay;
         if(empty($this->exchange) && empty($this->queue_name)) {
             throw new ParamErrorException('Param `exchange` or `queue_name` is require');
         }
@@ -70,10 +70,10 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
 
         $this->connection = new AMQPStreamConnection(self::HOST, self::PORT, self::USER, self::PASS);
         $this->channel = $this->connection->channel();
-        if(0 == $delay) {
+        if(0 == $this->delay) {
             $this->prepare();
         } else {
-            $this->prepareTypeDelay($delay);
+            $this->prepareTypeDelay();
         }
 
 
@@ -94,20 +94,17 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
                 false
             );
         }
-
     }
 
     /**
      * delay prepare
-     * @param $delay
      */
-    public function prepareTypeDelay($delay){
+    public function prepareTypeDelay(){
 
-        $this->delay                = $delay;
-        $delay_exchange_name        = "{$this->exchange}_delay_{$this->delay}";
-        $this->delay_exchange_name  = $delay_exchange_name;
+        $this->delay_exchange_name  = "{$this->exchange}_delay_{$this->delay}";
 
-        $this->channel->exchange_declare($delay_exchange_name , Config::DELAY_EXCHANGE_TYPE,false,false,false);
+        //declare
+        $this->channel->exchange_declare($this->delay_exchange_name , Config::DELAY_EXCHANGE_TYPE,false,false,false);
         $this->channel->exchange_declare($this->exchange, self::DEFAULT_EXCHANGE_TYPE,false,false,false);
 
     }
@@ -118,37 +115,49 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
      * @param $payload
      */
     public function push($payload, $router_key = ''){
+        if(0 == $this->delay) {
+            $this->immediatePush($payload, $router_key);
+        } else {
+            $this->delayPush($payload, $router_key);
+        }
+        Console::debug("[Push][" . ($this->delay ? "Delay={$this->delay}":"Immediate" ) . "] ", [
+            "message" => $payload,
+            "router_key" => $router_key
+        ]);
+    }
 
+    /**
+     * push normal task
+     * @param $payload
+     * @param string $router_key
+     */
+    protected function immediatePush($payload, $router_key = ''){
         $msg = new AMQPMessage(
             $payload,
             [
                 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,// persistent message
             ]);
         if($this->exchange) {
-             $this->channel->basic_publish($msg, $this->exchange, $router_key);
+            $this->channel->basic_publish($msg, $this->exchange, $router_key);
         } else {
-             $this->channel->basic_publish($msg, '', $this->queue_name);
+            $this->channel->basic_publish($msg, '', $this->queue_name);
         }
-
     }
 
     /**
      * push delay task
-     * only use exchange. if you just want to use queue, refer to the function `push` for editing this code
      * @param $router_key
      * @param $payload
-     * @param $delay
      */
-    public function delayPush($payload, $delay, $router_key)
+    protected function delayPush($payload, $router_key)
     {
-        $delay = intval($delay);
         $delay_queue_name           = "{$this->exchange}_{$router_key}_delay_{$this->delay}";
         $this->delay_queue_name     = $delay_queue_name;
 
         $tale = new AMQPTable();
         $tale->set('x-dead-letter-exchange', $this->exchange);
         $tale->set('x-dead-letter-routing-key', $router_key);
-        $tale->set('x-message-ttl', $delay * 1000);
+        $tale->set('x-message-ttl', $this->delay * 1000);
 
         //for delay waiting
         $this->channel->queue_declare($delay_queue_name,false,$durable = true,false,false,false,$tale);
@@ -167,7 +176,6 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
             $this->delay_exchange_name,
             $router_key
         );
-        Console::debug("[Pusher][Delay][$delay] $payload", $properties);
 
     }
 

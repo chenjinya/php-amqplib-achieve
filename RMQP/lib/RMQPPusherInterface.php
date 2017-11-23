@@ -11,8 +11,6 @@ namespace RMQP\lib;
 
 interface RMQPPusherInterface
 {
-
     public function __construct($topic, $queue_name, $option);
     public function push($payload, $router_key);
-    public function delayPush($payload, $delay, $router_key);
 }

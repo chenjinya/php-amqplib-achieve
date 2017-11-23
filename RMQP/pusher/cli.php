@@ -58,9 +58,4 @@ $delay =  get('--delay', 0);
 $fullClass = "RMQP\\pusher\\{$class_name}";
 
 $a = new $fullClass($exchange, $queue_name, $delay);
-if($delay) {
-    $a->delayPush($message,$delay, $router_key);
-} else {
-    $a->push($message, $router_key);
-}
-
+$a->push($message, $router_key);
