@@ -142,8 +142,8 @@ abstract class RMQPPusherAbstract implements RMQPPusherInterface
      */
     protected function delayPush($payload, $router_key)
     {
-        $delay_queue_name           = "delay_{$router_key}_{$this->delay}";
-        $delay_router_key           = "delay.{$router_key}.{$this->delay}";
+        $delay_queue_name  = "delay_{$this->exchange}_{$router_key}_{$this->delay}";
+        $delay_router_key  = "delay.{$this->exchange}.{$router_key}.{$this->delay}";
 
         $tale = new AMQPTable();
         $tale->set('x-dead-letter-exchange', $this->exchange);
