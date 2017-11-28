@@ -61,7 +61,22 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
         }
 
 
-        $this->connection = new AMQPStreamConnection(self::HOST, self::PORT, self::USER, self::PASS);
+        $this->connection = new AMQPStreamConnection(
+            self::HOST,
+            self::PORT,
+            self::USER,
+            self::PASS,
+            $vhost = '/',
+            $insist = false,
+            $login_method = 'AMQPLAIN',
+            $login_response = null,
+            $locale = 'en_US',
+            $connection_timeout = 3.0,
+            $read_write_timeout = 10,
+            $context = null,
+            $keepalive = false,
+            $heartbeat = 5
+        );
         $this->channel = $this->connection->channel();
 
         if(0 == $this->delay) {
