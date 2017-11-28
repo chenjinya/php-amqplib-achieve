@@ -87,7 +87,13 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
     public function prepare(){
 
         if($this->exchange == true) {
-            $this->channel->exchange_declare($this->exchange, Config::DEFAULT_EXCHANGE_TYPE, false, false, false);
+            $this->channel->exchange_declare(
+                $this->exchange,
+                Config::DEFAULT_EXCHANGE_TYPE,
+                false,
+                $durable= true,
+                false
+            );
             list($queue_name, ,) = $this->channel->queue_declare(
                 $this->queue_name,
                 false,
@@ -162,7 +168,8 @@ abstract class RMQPWorkerAbstract implements RMQPWorkerInterface
                 // show ack status: sudo rabbitmqctl list_queues name messages_ready messages_unacknowledged
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             } else {
-                Console::error("Execute return FALSE, task exec FAILED,  attention to queue ACK");
+                Console::error("Execute return FALSE, task exec FAILED,  attention to queue ACK, Send nack");
+                $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag'], false, $requeue = true);
             }
         };
 
